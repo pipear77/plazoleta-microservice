@@ -1,20 +1,30 @@
 apply plugin: 'org.springframework.boot'
+apply plugin: 'jacoco' // Habilitamos JaCoCo
+
+// Configuración de la versión de JaCoCo
+jacoco {
+    toolVersion = "0.8.11"
+}
 
 dependencies {
-	implementation project(':feign-client')
-	testImplementation 'org.springframework:spring-web'
-	implementation project(':api-rest')
-	implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
-	implementation project(':jpa-repository')
+    // 1. Módulos del proyecto (Clean Architecture)
+    implementation project(':feign-client')
+    implementation project(':api-rest')
+    implementation project(':jpa-repository')
     implementation project(':model')
     implementation project(':usecase')
+
+    // 2. Spring Boot y Utilidades
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
 
-
-    // Agrega esta línea para habilitar Swagger UI
+    // Habilitar Swagger UI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 
-    runtimeOnly('org.springframework.boot:spring-boot-devtools')
+    runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // 3. Dependencias de Testing
+    testImplementation 'org.springframework:spring-web'
     testImplementation 'com.tngtech.archunit:archunit:1.5.1'
     testImplementation 'tools.jackson.core:jackson-databind'
 }
@@ -25,11 +35,89 @@ tasks.register('explodedJar', Copy) {
 }
 
 jar {
-    // To disable the *-plain.jar
     enabled = false
 }
 
 bootJar {
-    // Sets output jar name
     archiveFileName = "${project.getParent().getName()}.${archiveExtension.get()}"
 }
+
+// ==========================================
+// CONFIGURACIÓN DE TESTING Y JACOCO
+// ==========================================
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+def exclusions = [
+        '**/*Application*',
+        '**/config/**',
+        '**/ArchitectureTest*',
+        '**/Utils*',
+        '**/dto/**',
+        '**/entity/**',
+        '**/model/**',
+        '**/exception/**',
+        '**/helper/**'
+]
+
+// 1. Lista de submódulos que queremos evaluar
+def domainAndInfraProjects = [
+        project(':api-rest'),
+        project(':usecase'),
+        project(':jpa-repository'),
+        project(':feign-client')
+]
+
+jacocoTestReport {
+    // Le decimos a Gradle que espere a que terminen los tests de los submódulos y de este módulo
+    dependsOn(domainAndInfraProjects.collect { it.tasks.withType(Test) })
+    dependsOn(tasks.withType(Test))
+
+    reports {
+        xml.required = true
+        html.required = true
+    }
+
+    additionalSourceDirs.setFrom(files(domainAndInfraProjects.collect { it.sourceSets.main.allSource.srcDirs }))
+    additionalClassDirs.setFrom(files(domainAndInfraProjects.collect { it.sourceSets.main.output }))
+
+    // Apuntamos directamente a los archivos físicos de cada módulo para evitar colapsos con las colecciones
+    def execDataFiles = domainAndInfraProjects.collect { it.file("build/jacoco/test.exec") }
+    execDataFiles.add(file("build/jacoco/test.exec"))
+    executionData.setFrom(files(execDataFiles))
+
+    afterEvaluate {
+        def allClasses = classDirectories.files + additionalClassDirs.files
+        classDirectories.setFrom(files(allClasses.collect {
+            fileTree(dir: it, exclude: exclusions)
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
+
+    additionalClassDirs.setFrom(files(domainAndInfraProjects.collect { it.sourceSets.main.output }))
+
+    def execDataFiles = domainAndInfraProjects.collect { it.file("build/jacoco/test.exec") }
+    execDataFiles.add(file("build/jacoco/test.exec"))
+    executionData.setFrom(files(execDataFiles))
+
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.80
+            }
+        }
+    }
+    afterEvaluate {
+        def allClasses = classDirectories.files + additionalClassDirs.files
+        classDirectories.setFrom(files(allClasses.collect {
+            fileTree(dir: it, exclude: exclusions)
+        }))
+    }
+}
+check.dependsOn jacocoTestCoverageVerification
