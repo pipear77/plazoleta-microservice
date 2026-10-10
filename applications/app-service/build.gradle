@@ -1,9 +1,19 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
+	implementation project(':feign-client')
+	testImplementation 'org.springframework:spring-web'
+	implementation project(':api-rest')
+	implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
+	implementation project(':jpa-repository')
     implementation project(':model')
     implementation project(':usecase')
     implementation 'org.springframework.boot:spring-boot-starter'
+
+
+    // Agrega esta línea para habilitar Swagger UI
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
     testImplementation 'com.tngtech.archunit:archunit:1.5.1'
     testImplementation 'tools.jackson.core:jackson-databind'
@@ -23,4 +33,3 @@ bootJar {
     // Sets output jar name
     archiveFileName = "${project.getParent().getName()}.${archiveExtension.get()}"
 }
-

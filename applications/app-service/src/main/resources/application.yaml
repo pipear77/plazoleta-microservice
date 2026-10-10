@@ -1,14 +1,20 @@
-##Spring Configuration
 server:
   port: 8080
+
 spring:
   application:
-    name: plazoleta
-  devtools:
-    add-properties: false
-  h2:
-    console:
-      enabled: true
-      path: /h2
-  profiles:
-    include:
+    name: plazoleta-microservice
+  datasource:
+    url: jdbc:postgresql://localhost:5434/plazoleta_db
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    # Aquí está el cambio clave (camelCase en lugar de guion)
+    databasePlatform: org.hibernate.dialect.PostgreSQLDialect
+
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8080"

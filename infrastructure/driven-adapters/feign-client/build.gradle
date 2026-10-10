@@ -1,0 +1,6 @@
+dependencies {
+    implementation project(':model')
+    implementation 'org.springframework:spring-context'
+    // Reemplazamos Feign por el starter web nativo
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+}
