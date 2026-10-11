@@ -1,6 +1,7 @@
 package com.pragma.plazoleta.api;
 
-import com.pragma.plazoleta.api.dto.RestaurantRequestDto;
+import com.pragma.plazoleta.api.restaurant.dto.RestaurantRequestDto;
+import com.pragma.plazoleta.api.restaurant.RestaurantController;
 import com.pragma.plazoleta.model.restaurant.Restaurant;
 import com.pragma.plazoleta.usecase.restaurant.RestaurantUseCase;
 import org.junit.jupiter.api.Test;

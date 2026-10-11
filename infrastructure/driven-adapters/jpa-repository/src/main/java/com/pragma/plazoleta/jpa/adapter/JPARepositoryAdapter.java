@@ -1,14 +1,16 @@
-package com.pragma.plazoleta.jpa;
+package com.pragma.plazoleta.jpa.adapter;
 
 import com.pragma.plazoleta.jpa.entity.RestaurantEntity;
 import com.pragma.plazoleta.jpa.helper.AdapterOperations;
+import com.pragma.plazoleta.jpa.repository.JPARepository;
 import com.pragma.plazoleta.model.restaurant.Restaurant;
 import com.pragma.plazoleta.model.restaurant.gateways.RestaurantRepository;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class JPARepositoryAdapter extends AdapterOperations<Restaurant, RestaurantEntity, Long, JPARepository>
+public class JPARepositoryAdapter
+        extends AdapterOperations<Restaurant, RestaurantEntity, Long, JPARepository>
         implements RestaurantRepository {
 
     public JPARepositoryAdapter(JPARepository repository, ObjectMapper mapper) {
@@ -17,7 +19,6 @@ public class JPARepositoryAdapter extends AdapterOperations<Restaurant, Restaura
 
     @Override
     public Restaurant saveRestaurant(Restaurant restaurant) {
-        // super.save() ya mapea de Restaurant (Dominio) a RestaurantEntity (BD) automáticamente
         return super.save(restaurant);
     }
 }

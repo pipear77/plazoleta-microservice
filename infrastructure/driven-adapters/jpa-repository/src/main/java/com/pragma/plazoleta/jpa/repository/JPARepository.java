@@ -1,4 +1,4 @@
-package com.pragma.plazoleta.jpa;
+package com.pragma.plazoleta.jpa.repository;
 
 import com.pragma.plazoleta.jpa.entity.RestaurantEntity;
 import org.springframework.data.repository.CrudRepository;

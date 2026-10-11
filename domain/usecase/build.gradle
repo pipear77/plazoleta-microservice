@@ -1,6 +1,3 @@
 dependencies {
     implementation project(':model')
-    // Agrega estas dos líneas para habilitar Lombok aquí
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
 }

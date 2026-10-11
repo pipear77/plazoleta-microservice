@@ -1,4 +1,4 @@
-package com.pragma.plazoleta.api.dto;
+package com.pragma.plazoleta.api.restaurant.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

@@ -1,6 +1,8 @@
 package com.pragma.plazoleta.jpa;
 
+import com.pragma.plazoleta.jpa.adapter.JPARepositoryAdapter;
 import com.pragma.plazoleta.jpa.entity.RestaurantEntity;
+import com.pragma.plazoleta.jpa.repository.JPARepository;
 import com.pragma.plazoleta.model.restaurant.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

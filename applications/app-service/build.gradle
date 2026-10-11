@@ -13,7 +13,7 @@ dependencies {
     implementation project(':jpa-repository')
     implementation project(':model')
     implementation project(':usecase')
-
+    runtimeOnly 'org.postgresql:postgresql'
     // 2. Spring Boot y Utilidades
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
