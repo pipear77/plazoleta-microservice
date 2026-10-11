@@ -19,6 +19,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +37,8 @@ class DishControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
+
+    // ==================== POST (Create Dish) Tests ====================
 
     @Test
     void createDish_success_shouldReturnCreated() throws Exception {
@@ -90,5 +93,63 @@ class DishControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(dishUseCase, never()).createDish(any(Dish.class), anyLong());
+    }
+
+    // ==================== PUT (Update Dish) Tests ====================
+
+    @Test
+    void updateDish_success_shouldReturnOk() throws Exception {
+        String json = "{\"precio\":32000,"
+                + "\"descripcion\":\"Nueva descripcion\","
+                + "\"idPropietario\":1}";
+
+        Dish updatedDish = Dish.builder()
+                .id(1L)
+                .nombre("Bandeja Paisa")
+                .precio(32000)
+                .descripcion("Nueva descripcion")
+                .urlImagen("http://img")
+                .idCategoria(1L)
+                .idRestaurante(1L)
+                .activo(true)
+                .build();
+
+        when(dishUseCase.updateDish(eq(1L), eq(32000), eq("Nueva descripcion"), eq(1L)))
+                .thenReturn(updatedDish);
+
+        mockMvc.perform(put("/api/v1/dishes/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk());
+
+        verify(dishUseCase).updateDish(eq(1L), eq(32000), eq("Nueva descripcion"), eq(1L));
+    }
+
+    @Test
+    void updateDish_whenPriceInvalid_shouldReturnBadRequest() throws Exception {
+        String json = "{\"precio\":0,"
+                + "\"descripcion\":\"Nueva descripcion\","
+                + "\"idPropietario\":1}";
+
+        mockMvc.perform(put("/api/v1/dishes/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+
+        verify(dishUseCase, never()).updateDish(anyLong(), any(), any(), anyLong());
+    }
+
+    @Test
+    void updateDish_whenDescriptionBlank_shouldReturnBadRequest() throws Exception {
+        String json = "{\"precio\":32000,"
+                + "\"descripcion\":\"\","
+                + "\"idPropietario\":1}";
+
+        mockMvc.perform(put("/api/v1/dishes/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+
+        verify(dishUseCase, never()).updateDish(anyLong(), any(), any(), anyLong());
     }
 }
