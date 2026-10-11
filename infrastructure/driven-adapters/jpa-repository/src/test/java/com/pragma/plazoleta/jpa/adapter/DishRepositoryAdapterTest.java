@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -77,20 +78,22 @@ class DishRepositoryAdapterTest {
 
         when(dishJpaRepository.findById(1L)).thenReturn(Optional.of(savedEntity));
 
-        Optional<Dish> result = adapter.findById(1L);
+        // Ahora recibimos el Dish directo
+        Dish result = adapter.findById(1L);
 
-        assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
-        assertEquals("Bandeja Paisa", result.get().getNombre());
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("Bandeja Paisa", result.getNombre());
     }
 
     @Test
-    void findById_whenNotExists_shouldReturnEmpty() {
+    void findById_whenNotExists_shouldReturnNull() {
         when(dishJpaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Optional<Dish> result = adapter.findById(99L);
+        // Ahora evaluamos que retorne null directamente
+        Dish result = adapter.findById(99L);
 
-        assertTrue(result.isEmpty());
+        assertNull(result);
     }
 
     @Test

@@ -5,5 +5,5 @@ import java.util.Optional;
 
 public interface DishRepository {
     Dish saveDish(Dish dish);
-    Optional<Dish> findById(Long id);
+    Dish findById(Long id);
 }

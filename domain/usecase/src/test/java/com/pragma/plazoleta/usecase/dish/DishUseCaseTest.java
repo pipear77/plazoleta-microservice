@@ -130,4 +130,56 @@ class DishUseCaseTest {
 
         verify(dishRepository, never()).saveDish(any(Dish.class));
     }
+
+    // ==================== HU04 updateDish ====================
+
+    @Test
+    void updateDish_success_shouldUpdateOnlyPriceAndDescription() {
+        Dish dish = buildDish().toBuilder().id(5L).activo(true).build();
+        when(dishRepository.findById(5L)).thenReturn(dish);
+        when(restaurantRepository.findById(1L)).thenReturn(restaurant);
+        when(dishRepository.saveDish(any(Dish.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Dish result = dishUseCase.updateDish(5L, 30000, "Nueva descripción", 10L);
+
+        assertNotNull(result);
+        assertEquals(30000, result.getPrecio());
+        assertEquals("Nueva descripción", result.getDescripcion());
+        assertEquals(dish.getNombre(), result.getNombre());
+        verify(dishRepository).saveDish(any(Dish.class));
+    }
+
+    @Test
+    void updateDish_whenDishNotFound_shouldThrowDishNotFoundException() {
+        when(dishRepository.findById(5L)).thenReturn(null);
+
+        assertThrows(DishNotFoundException.class,
+                () -> dishUseCase.updateDish(5L, 30000, "desc", 10L));
+
+        verify(dishRepository, never()).saveDish(any(Dish.class));
+    }
+
+    @Test
+    void updateDish_whenRestaurantNotFound_shouldThrowRestaurantNotFoundException() {
+        Dish dish = buildDish().toBuilder().id(5L).build();
+        when(dishRepository.findById(5L)).thenReturn(dish);
+        when(restaurantRepository.findById(1L)).thenReturn(null);
+
+        assertThrows(RestaurantNotFoundException.class,
+                () -> dishUseCase.updateDish(5L, 30000, "desc", 10L));
+
+        verify(dishRepository, never()).saveDish(any(Dish.class));
+    }
+
+    @Test
+    void updateDish_whenOwnerDoesNotMatch_shouldThrowNotRestaurantOwnerException() {
+        Dish dish = buildDish().toBuilder().id(5L).build();
+        when(dishRepository.findById(5L)).thenReturn(dish);
+        when(restaurantRepository.findById(1L)).thenReturn(restaurant);
+
+        assertThrows(NotRestaurantOwnerException.class,
+                () -> dishUseCase.updateDish(5L, 30000, "desc", 99L));
+
+        verify(dishRepository, never()).saveDish(any(Dish.class));
+    }
 }

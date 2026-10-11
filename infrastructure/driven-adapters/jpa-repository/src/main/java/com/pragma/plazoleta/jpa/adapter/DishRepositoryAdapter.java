@@ -25,7 +25,7 @@ public class DishRepositoryAdapter implements DishRepository {
     }
 
     @Override
-    public Optional<Dish> findById(Long id) {
-        return dishJpaRepository.findById(id).map(mapper::toDomain);
+    public Dish findById(Long id) {
+        return dishJpaRepository.findById(id).map(mapper::toDomain).orElse(null);
     }
 }
