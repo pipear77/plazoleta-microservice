@@ -24,6 +24,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static org.mockito.ArgumentMatchers.argThat;
+
 @ExtendWith(MockitoExtension.class)
 class DishUseCaseTest {
 
@@ -179,6 +181,66 @@ class DishUseCaseTest {
 
         assertThrows(NotRestaurantOwnerException.class,
                 () -> dishUseCase.updateDish(5L, 30000, "desc", 99L));
+
+        verify(dishRepository, never()).saveDish(any(Dish.class));
+    }
+
+    // ==================== HU07 changeDishStatus ====================
+
+    @Test
+    void changeDishStatus_success_shouldToggleActiveFromTrueToFalse() {
+        Dish dish = buildDish().toBuilder().id(5L).activo(true).build();
+        when(dishRepository.findById(5L)).thenReturn(dish);
+        when(restaurantRepository.findById(1L)).thenReturn(restaurant);
+
+        dishUseCase.changeDishStatus(5L, 10L);
+
+        // Verificamos que se guarda el plato con el estado invertido (false)
+        verify(dishRepository).saveDish(argThat(savedDish -> !savedDish.getActivo()));
+    }
+
+    @Test
+    void changeDishStatus_success_shouldToggleActiveFromFalseToTrue() {
+        Dish dish = buildDish().toBuilder().id(5L).activo(false).build();
+        when(dishRepository.findById(5L)).thenReturn(dish);
+        when(restaurantRepository.findById(1L)).thenReturn(restaurant);
+
+        dishUseCase.changeDishStatus(5L, 10L);
+
+        // Verificamos que se guarda el plato con el estado invertido (true)
+        verify(dishRepository).saveDish(argThat(Dish::getActivo));
+    }
+
+    @Test
+    void changeDishStatus_whenDishNotFound_shouldThrowDishNotFoundException() {
+        when(dishRepository.findById(5L)).thenReturn(null);
+
+        assertThrows(DishNotFoundException.class,
+                () -> dishUseCase.changeDishStatus(5L, 10L));
+
+        verify(dishRepository, never()).saveDish(any(Dish.class));
+    }
+
+    @Test
+    void changeDishStatus_whenRestaurantNotFound_shouldThrowRestaurantNotFoundException() {
+        Dish dish = buildDish().toBuilder().id(5L).build();
+        when(dishRepository.findById(5L)).thenReturn(dish);
+        when(restaurantRepository.findById(1L)).thenReturn(null);
+
+        assertThrows(RestaurantNotFoundException.class,
+                () -> dishUseCase.changeDishStatus(5L, 10L));
+
+        verify(dishRepository, never()).saveDish(any(Dish.class));
+    }
+
+    @Test
+    void changeDishStatus_whenOwnerDoesNotMatch_shouldThrowNotRestaurantOwnerException() {
+        Dish dish = buildDish().toBuilder().id(5L).build();
+        when(dishRepository.findById(5L)).thenReturn(dish);
+        when(restaurantRepository.findById(1L)).thenReturn(restaurant); // restaurant propietario es 10L
+
+        assertThrows(NotRestaurantOwnerException.class,
+                () -> dishUseCase.changeDishStatus(5L, 99L)); // Se intenta cambiar con propietario 99L
 
         verify(dishRepository, never()).saveDish(any(Dish.class));
     }

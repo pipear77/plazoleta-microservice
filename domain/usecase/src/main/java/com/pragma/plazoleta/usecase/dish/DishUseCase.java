@@ -64,6 +64,31 @@ public class DishUseCase {
         return dishRepository.saveDish(updated);
     }
 
+    // METODO: HU07 - Habilitar/Deshabilitar Plato
+    public void changeDishStatus(Long idPlato, Long idPropietario) {
+        Dish dish = dishRepository.findById(idPlato);
+        if (dish == null) {
+            throw new DishNotFoundException("El plato no existe");
+        }
+
+        Restaurant restaurant = restaurantRepository.findById(dish.getIdRestaurante());
+        if (restaurant == null) {
+            throw new RestaurantNotFoundException("El restaurante no existe");
+        }
+
+        // Regla: No se permiten modificar platos de otros restaurantes diferentes al propio
+        if (!restaurant.getIdPropietario().equals(idPropietario)) {
+            throw new NotRestaurantOwnerException("El usuario no es el propietario del restaurante");
+        }
+
+        // Invertimos el estado actual (si es true pasa a false, y viceversa)
+        Dish updatedDish = dish.toBuilder()
+                .activo(!dish.getActivo())
+                .build();
+
+        dishRepository.saveDish(updatedDish);
+    }
+
     private void validatePrice(Integer precio) {
         if (precio == null || precio <= 0) {
             throw new InvalidDishPriceException("El precio debe ser un número entero mayor a 0");

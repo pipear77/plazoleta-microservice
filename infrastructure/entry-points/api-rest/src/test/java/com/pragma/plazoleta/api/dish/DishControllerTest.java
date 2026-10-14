@@ -22,6 +22,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+
 @ExtendWith(MockitoExtension.class)
 class DishControllerTest {
 
@@ -151,5 +157,28 @@ class DishControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(dishUseCase, never()).updateDish(anyLong(), any(), any(), anyLong());
+    }
+
+    // ==================== PATCH (Change Status) Tests ====================
+
+    @Test
+    void changeDishStatus_success_shouldReturnOk() throws Exception {
+        // Mock SecurityContextHolder para simular la extracción del ID del propietario desde el token
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getDetails()).thenReturn(10L); // El ID del propietario mockeado
+        SecurityContextHolder.setContext(securityContext);
+
+        // Act & Assert
+        mockMvc.perform(patch("/api/v1/dishes/1/status")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        // Verificamos que se llame al caso de uso con el ID del plato (1) y el ID del propietario extraído (10)
+        verify(dishUseCase).changeDishStatus(eq(1L), eq(10L));
+
+        // Limpieza del contexto
+        SecurityContextHolder.clearContext();
     }
 }

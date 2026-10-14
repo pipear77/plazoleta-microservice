@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -43,5 +44,16 @@ public class DishController {
         );
 
         return ResponseEntity.ok(updated);
+    }
+
+    // ENDPOINT: HU07
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Void> changeDishStatus(@PathVariable("id") Long id) {
+        // Extraemos el ID del propietario logueado desde el token JWT (que guardaste en el filtro)
+        Long idPropietario = (Long) SecurityContextHolder.getContext().getAuthentication().getDetails();
+
+        dishUseCase.changeDishStatus(id, idPropietario);
+
+        return ResponseEntity.ok().build();
     }
 }

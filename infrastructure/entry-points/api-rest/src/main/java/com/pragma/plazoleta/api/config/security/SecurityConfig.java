@@ -31,6 +31,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/dishes").hasRole("PROPIETARIO")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/dishes/**").hasRole("PROPIETARIO")
 
+                        // REGLA: HU07 Habilitar/Deshabilitar plato
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/dishes/**").hasRole("PROPIETARIO")
+
                         .anyRequest().authenticated()
                 )
                 // Agregamos nuestro filtro personalizado antes del filtro de validación tradicional
