@@ -15,16 +15,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static org.mockito.ArgumentMatchers.argThat;
 
 @ExtendWith(MockitoExtension.class)
 class DishUseCaseTest {
@@ -243,5 +243,37 @@ class DishUseCaseTest {
                 () -> dishUseCase.changeDishStatus(5L, 99L)); // Se intenta cambiar con propietario 99L
 
         verify(dishRepository, never()).saveDish(any(Dish.class));
+    }
+
+    // ==================== HU10 getDishesPaginated ====================
+
+    @Test
+    void getDishesPaginated_success_shouldReturnDishList() {
+        // Arrange
+        List<Dish> expectedDishes = List.of(buildDish());
+        when(restaurantRepository.findById(1L)).thenReturn(restaurant);
+        when(dishRepository.findDishesByRestaurantAndCategory(1L, 2L, 0, 10)).thenReturn(expectedDishes);
+
+        // Act
+        List<Dish> result = dishUseCase.getDishesPaginated(1L, 2L, 0, 10);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(restaurantRepository).findById(1L);
+        verify(dishRepository).findDishesByRestaurantAndCategory(1L, 2L, 0, 10);
+    }
+
+    @Test
+    void getDishesPaginated_whenRestaurantNotFound_shouldThrowRestaurantNotFoundException() {
+        // Arrange
+        when(restaurantRepository.findById(1L)).thenReturn(null);
+
+        // Act & Assert
+        assertThrows(RestaurantNotFoundException.class,
+                () -> dishUseCase.getDishesPaginated(1L, 2L, 0, 10));
+
+        // Verificamos que nunca se llame al repositorio de platos si el restaurante no existe
+        verify(dishRepository, never()).findDishesByRestaurantAndCategory(any(), any(), anyInt(), anyInt());
     }
 }

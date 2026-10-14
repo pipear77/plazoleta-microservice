@@ -36,6 +36,8 @@ public class SecurityConfig {
 
                         //regla para la HU09 CLIENTE
                         .requestMatchers(HttpMethod.GET, "/api/v1/restaurants").hasRole("CLIENTE")
+                        // Regla para la HU10 CLIENTE
+                        .requestMatchers(HttpMethod.GET, "/api/v1/dishes/restaurant/**").hasRole("CLIENTE")
 
                         .anyRequest().authenticated()
                 )

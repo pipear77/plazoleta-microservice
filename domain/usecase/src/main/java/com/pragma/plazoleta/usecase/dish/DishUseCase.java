@@ -10,6 +10,8 @@ import com.pragma.plazoleta.usecase.dish.exception.NotRestaurantOwnerException;
 import com.pragma.plazoleta.usecase.dish.exception.RestaurantNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 public class DishUseCase {
 
@@ -87,6 +89,15 @@ public class DishUseCase {
                 .build();
 
         dishRepository.saveDish(updatedDish);
+    }
+
+    public List<Dish> getDishesPaginated(Long idRestaurante, Long idCategoria, int page, int size) {
+        Restaurant restaurant = restaurantRepository.findById(idRestaurante);
+        if (restaurant == null) {
+            throw new RestaurantNotFoundException("El restaurante no existe");
+        }
+
+        return dishRepository.findDishesByRestaurantAndCategory(idRestaurante, idCategoria, page, size);
     }
 
     private void validatePrice(Integer precio) {

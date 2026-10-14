@@ -28,6 +28,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 
+import java.util.List;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 @ExtendWith(MockitoExtension.class)
 class DishControllerTest {
 
@@ -180,5 +184,53 @@ class DishControllerTest {
 
         // Limpieza del contexto
         SecurityContextHolder.clearContext();
+    }
+
+    // ==================== GET (List Dishes HU10) Tests ====================
+
+    @Test
+    void getDishesByRestaurant_withCategoryId_shouldReturnOkAndList() throws Exception {
+        // Arrange
+        List<Dish> mockDishes = List.of(
+                Dish.builder().id(1L).nombre("Plato Filtrado 1").build(),
+                Dish.builder().id(2L).nombre("Plato Filtrado 2").build()
+        );
+
+        // Simulamos la llamada con idRestaurante=1 y categoryId=2
+        when(dishUseCase.getDishesPaginated(1L, 2L, 0, 10)).thenReturn(mockDishes);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/dishes/restaurant/1")
+                        .param("categoryId", "2")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(2))
+                .andExpect(jsonPath("$[0].nombre").value("Plato Filtrado 1"));
+
+        verify(dishUseCase).getDishesPaginated(1L, 2L, 0, 10);
+    }
+
+    @Test
+    void getDishesByRestaurant_withoutCategoryId_shouldReturnOkAndList() throws Exception {
+        // Arrange
+        List<Dish> mockDishes = List.of(
+                Dish.builder().id(1L).nombre("Plato General 1").build()
+        );
+
+        // Simulamos la llamada con categoryId nulo (sin filtro)
+        when(dishUseCase.getDishesPaginated(1L, null, 0, 10)).thenReturn(mockDishes);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/dishes/restaurant/1")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(1))
+                .andExpect(jsonPath("$[0].nombre").value("Plato General 1"));
+
+        verify(dishUseCase).getDishesPaginated(1L, null, 0, 10);
     }
 }
