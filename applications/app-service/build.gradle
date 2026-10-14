@@ -99,6 +99,8 @@ jacocoTestReport {
         classDirectories.setFrom(files(allClasses.collect {
             fileTree(dir: it, exclude: exclusions)
         }))
+        // ¡ESTA ES LA LÍNEA QUE FALTA! Limpia los directorios adicionales no filtrados.
+        additionalClassDirs.setFrom(files())
     }
 }
 
@@ -123,6 +125,8 @@ jacocoTestCoverageVerification {
         classDirectories.setFrom(files(allClasses.collect {
             fileTree(dir: it, exclude: exclusions)
         }))
+        // ¡ESTA ES LA LÍNEA QUE FALTA! Limpia los directorios adicionales no filtrados.
+        additionalClassDirs.setFrom(files())
     }
 }
 check.dependsOn jacocoTestCoverageVerification

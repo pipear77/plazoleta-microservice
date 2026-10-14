@@ -2,12 +2,15 @@ package com.pragma.plazoleta.api.restaurant;
 
 import com.pragma.plazoleta.api.restaurant.dto.RestaurantRequestDto;
 import com.pragma.plazoleta.model.restaurant.Restaurant;
+import com.pragma.plazoleta.model.restaurant.dto.RestaurantPaginationDto;
 import com.pragma.plazoleta.usecase.restaurant.RestaurantUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/v1/restaurants")
@@ -29,5 +32,14 @@ public class RestaurantController {
 
         restaurantUseCase.createRestaurant(restaurant);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<RestaurantPaginationDto>> getRestaurants(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        List<RestaurantPaginationDto> restaurants = restaurantUseCase.getRestaurantsPaginated(page, size);
+        return ResponseEntity.ok(restaurants);
     }
 }

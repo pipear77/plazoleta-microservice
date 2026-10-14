@@ -1,9 +1,12 @@
 package com.pragma.plazoleta.usecase.restaurant;
 
 import com.pragma.plazoleta.model.restaurant.Restaurant;
+import com.pragma.plazoleta.model.restaurant.dto.RestaurantPaginationDto;
 import com.pragma.plazoleta.model.restaurant.gateways.RestaurantRepository;
 import com.pragma.plazoleta.model.restaurant.gateways.UserValidationService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 public class RestaurantUseCase {
@@ -20,6 +23,12 @@ public class RestaurantUseCase {
         }
 
         return restaurantRepository.saveRestaurant(restaurant);
+    }
+
+    // NUEVO MÉTODO PARA HU09: Listar Restaurantes Paginados
+    public List<RestaurantPaginationDto> getRestaurantsPaginated(int page, int size) {
+        // Delegamos al repositorio la responsabilidad de traer la página ordenada
+        return restaurantRepository.findAllPaginated(page, size);
     }
 
     private void validateRestaurantRules(Restaurant restaurant) {

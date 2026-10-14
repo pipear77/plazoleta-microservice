@@ -1,6 +1,7 @@
 package com.pragma.plazoleta.usecase.restaurant;
 
 import com.pragma.plazoleta.model.restaurant.Restaurant;
+import com.pragma.plazoleta.model.restaurant.dto.RestaurantPaginationDto;
 import com.pragma.plazoleta.model.restaurant.gateways.RestaurantRepository;
 import com.pragma.plazoleta.model.restaurant.gateways.UserValidationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -107,5 +110,26 @@ class RestaurantUseCaseTest {
             restaurantUseCase.createRestaurant(validRestaurant);
         });
         assertEquals("El teléfono debe ser numérico, máximo 13 caracteres y puede incluir '+'.", exception.getMessage());
+    }
+
+    @Test
+    void getRestaurantsPaginated_shouldReturnPaginatedList() {
+        // Arrange
+        int page = 0;
+        int size = 10;
+        List<RestaurantPaginationDto> expectedList = List.of(
+                new RestaurantPaginationDto("Asados el Gordo", "http://logo1.png"),
+                new RestaurantPaginationDto("Burger King", "http://logo2.png")
+        );
+
+        when(restaurantRepository.findAllPaginated(page, size)).thenReturn(expectedList);
+
+        // Act
+        List<RestaurantPaginationDto> result = restaurantUseCase.getRestaurantsPaginated(page, size);
+
+        // Assert
+        assertEquals(2, result.size());
+        assertEquals("Asados el Gordo", result.get(0).getNombre());
+        verify(restaurantRepository).findAllPaginated(page, size);
     }
 }
