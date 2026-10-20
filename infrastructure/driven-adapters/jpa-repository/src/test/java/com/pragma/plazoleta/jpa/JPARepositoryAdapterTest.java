@@ -13,6 +13,8 @@ import org.reactivecommons.utils.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,5 +53,23 @@ class JPARepositoryAdapterTest {
         // Assert
         assertNotNull(result);
         assertEquals(1L, result.getId());
+    }
+
+    @Test
+    void findAllPaginated_ReturnsDtoList() {
+        RestaurantEntity entity = new RestaurantEntity();
+        entity.setNombre("Restaurante A");
+        entity.setUrlLogo("http://logo.com");
+
+        org.springframework.data.domain.Page<RestaurantEntity> mockPage = new org.springframework.data.domain.PageImpl<>(java.util.List.of(entity));
+        when(repository.findAll(any(org.springframework.data.domain.PageRequest.class))).thenReturn(mockPage);
+
+        java.util.List<com.pragma.plazoleta.model.restaurant.dto.RestaurantPaginationDto> result = adapter.findAllPaginated(0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Restaurante A", result.get(0).getNombre());
+        assertEquals("http://logo.com", result.get(0).getUrlLogo());
+        verify(repository).findAll(any(org.springframework.data.domain.PageRequest.class));
     }
 }

@@ -105,4 +105,34 @@ class DishRepositoryAdapterTest {
     void mapper_toDomain_whenNull_shouldReturnNull() {
         assertNull(new DishEntityMapper().toDomain(null));
     }
+
+    @Test
+    void findDishesByRestaurantAndCategory_withCategory_shouldReturnList() {
+        DishEntity entity = DishEntity.builder().id(1L).nombre("Sopa").build();
+        org.springframework.data.domain.Page<DishEntity> page = new org.springframework.data.domain.PageImpl<>(java.util.List.of(entity));
+
+        when(dishJpaRepository.findByIdRestauranteAndIdCategoriaAndActivoTrue(
+                any(Long.class), any(Long.class), any(org.springframework.data.domain.PageRequest.class)))
+                .thenReturn(page);
+
+        java.util.List<Dish> result = adapter.findDishesByRestaurantAndCategory(1L, 2L, 0, 10);
+
+        assertEquals(1, result.size());
+        verify(dishJpaRepository).findByIdRestauranteAndIdCategoriaAndActivoTrue(any(Long.class), any(Long.class), any(org.springframework.data.domain.PageRequest.class));
+    }
+
+    @Test
+    void findDishesByRestaurantAndCategory_withoutCategory_shouldReturnList() {
+        DishEntity entity = DishEntity.builder().id(1L).nombre("Sopa").build();
+        org.springframework.data.domain.Page<DishEntity> page = new org.springframework.data.domain.PageImpl<>(java.util.List.of(entity));
+
+        when(dishJpaRepository.findByIdRestauranteAndActivoTrue(
+                any(Long.class), any(org.springframework.data.domain.PageRequest.class)))
+                .thenReturn(page);
+
+        java.util.List<Dish> result = adapter.findDishesByRestaurantAndCategory(1L, null, 0, 10);
+
+        assertEquals(1, result.size());
+        verify(dishJpaRepository).findByIdRestauranteAndActivoTrue(any(Long.class), any(org.springframework.data.domain.PageRequest.class));
+    }
 }
